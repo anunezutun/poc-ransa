@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -20,12 +21,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class CotizationServiceImpl implements CotizationService {
 
     private static final String QUOATION_FILE_NAME = "quotation.csv";
-    private static final String HEADER_QUOTATION = "Orden,Descripcion,Profundidad,Ancho,Altura,Peso,Stackeable,Observaciones\n";
+    private static final String HEADER_QUOTATION = "Orden,Descripcion,Profundidad,Ancho,Altura,Peso,Stackeable,Tipo de vehiculo,Observaciones\n";
+    private static final int ORDER_POSITION = 0;
+    private static final int DESCRIPTION_POSITION = 1;
     private static final int DEPTH_POSITION = 2;
     private static final int WIDTH_POSITION = 3;
     private static final int HEIGTH_POSITION = 4;
     private static final int WEIGTH_POSITION = 5;
     private static final int STACKEABLE_POSITION = 6;
+    private static final String DELIMIT = "|";
 
     @Override
     public List<Item> chooseVehicle(List<Item> items) {
@@ -93,16 +97,23 @@ public class CotizationServiceImpl implements CotizationService {
                 line = line.replaceAll("\\s", "");
                 String[] columns = line.split(",");
 
-                StringBuilder observation = new StringBuilder();
-
-                Item.builder().depth(Double.valueOf(columns[DEPTH_POSITION]))
-                        .width(Double.valueOf(columns[WIDTH_POSITION]))
-                        .height(Double.valueOf(columns[HEIGTH_POSITION]))
-                        .weight(Double.valueOf(columns[WEIGTH_POSITION]))
-                        .stackable(Boolean.valueOf(columns[STACKEABLE_POSITION])).build();
+                Item item = chooseVehicle(Item.builder().order(columns[ORDER_POSITION])
+                    .description(columns[DESCRIPTION_POSITION])
+                    .depth(Double.valueOf(columns[DEPTH_POSITION]))
+                    .width(Double.valueOf(columns[WIDTH_POSITION]))
+                    .height(Double.valueOf(columns[HEIGTH_POSITION]))
+                    .weight(Double.valueOf(columns[WEIGTH_POSITION]))
+                    .stackable(Boolean.valueOf(columns[STACKEABLE_POSITION])).build());
 
                 out.append(line);
-                out.append(",").append(observation.toString());
+
+                if(!StringUtils.isEmpty(item.getAvailableVehicle())){
+                    out.append(",").append(item.getAvailableVehicle());
+                }else {
+                    out.append(",");
+                    out.append(",").append(String.join(DELIMIT,item.getObservations()));
+                }
+
                 out.append("\n");
             }
 
