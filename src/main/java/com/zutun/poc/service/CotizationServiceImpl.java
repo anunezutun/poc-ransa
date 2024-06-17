@@ -9,7 +9,6 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -76,12 +75,12 @@ public class CotizationServiceImpl implements CotizationService {
         String filePath = System.getProperty("java.io.tmpdir");
 
         File quotationFile =
-            new File(filePath.concat(File.separator).concat(QUOATION_FILE_NAME));
+                new File(filePath.concat(File.separator).concat(QUOATION_FILE_NAME));
 
         try (BufferedWriter out = new BufferedWriter(new FileWriter(quotationFile))) {
 
             BufferedReader bufferedReader =
-                new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+                    new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
 
             out.append(HEADER_QUOTATION);
 
@@ -93,14 +92,14 @@ public class CotizationServiceImpl implements CotizationService {
                 // Se eliminan los espacios y se separan los valores
                 line = line.replaceAll("\\s", "");
                 String[] columns = line.split(",");
-                
+
                 StringBuilder observation = new StringBuilder();
 
                 Item.builder().depth(Double.valueOf(columns[DEPTH_POSITION]))
-                    .width(Double.valueOf(columns[WIDTH_POSITION]))
-                    .height(Double.valueOf(columns[HEIGTH_POSITION]))
-                    .weight(Double.valueOf(columns[WEIGTH_POSITION]))
-                    .stackable(Boolean.valueOf(columns[STACKEABLE_POSITION])).build();
+                        .width(Double.valueOf(columns[WIDTH_POSITION]))
+                        .height(Double.valueOf(columns[HEIGTH_POSITION]))
+                        .weight(Double.valueOf(columns[WEIGTH_POSITION]))
+                        .stackable(Boolean.valueOf(columns[STACKEABLE_POSITION])).build();
 
                 out.append(line);
                 out.append(",").append(observation.toString());
@@ -112,6 +111,44 @@ public class CotizationServiceImpl implements CotizationService {
         }
 
         return quotationFile;
+    }
+
+    public Item chooseVehicle(Item item) {
+        var vehicles = getVehicles();
+        List<String> observations = new ArrayList<>();
+        vehicles = vehicles
+                .stream()
+                .filter(vehicleType -> vehicleType.getMaxDepth() >= item.getDepth())
+                .collect(Collectors.toList());
+        if (vehicles.isEmpty()) {
+            observations.add("La longitud sobrepasa el máximo permitido.");
+        }
+        vehicles = vehicles
+                .stream()
+                .filter(vehicleType -> vehicleType.getMaxWidth() >= item.getWidth())
+                .collect(Collectors.toList());
+        if (vehicles.isEmpty()) {
+            observations.add("El ancho sobrepasa el máximo permitido.");
+        }
+        vehicles = vehicles
+                .stream()
+                .filter(vehicleType -> vehicleType.getMaxHeight() >= item.getHeight())
+                .collect(Collectors.toList());
+        if (vehicles.isEmpty()) {
+            observations.add("El alto sobrepasa el máximo permitido.");
+        }
+        vehicles = vehicles
+                .stream()
+                .filter(vehicleType -> vehicleType.getMaxWeight() >= item.getWeight()/1000)
+                .collect(Collectors.toList());
+        if (vehicles.isEmpty()) {
+            observations.add("El peso sobrepasa el máximo permitido.");
+        } else {
+            var vehicle = vehicles.get(0);
+            item.setAvailableVehicle(vehicle.getName().concat(" ").concat(vehicle.getConfiguration()));
+        }
+        item.setObservations(observations);
+        return item;
     }
 
     private List<VehicleType> getVehicles() {
