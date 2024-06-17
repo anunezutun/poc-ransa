@@ -34,23 +34,39 @@ public class CotizationServiceImpl implements CotizationService {
         for (Item item : items) {
             //evaluar longitud
             var vehicles = getVehicles();
+            List<String> observations = new ArrayList<>();
             vehicles = vehicles
                     .stream()
                     .filter(vehicleType -> vehicleType.getMaxDepth() >= item.getDepth())
                     .collect(Collectors.toList());
+            if (vehicles.isEmpty()) {
+                observations.add("La longitud sobrepasa el máximo permitido.");
+            }
             vehicles = vehicles
                     .stream()
                     .filter(vehicleType -> vehicleType.getMaxWidth() >= item.getWidth())
                     .collect(Collectors.toList());
+            if (vehicles.isEmpty()) {
+                observations.add("El ancho sobrepasa el máximo permitido.");
+            }
             vehicles = vehicles
                     .stream()
                     .filter(vehicleType -> vehicleType.getMaxHeight() >= item.getHeight())
                     .collect(Collectors.toList());
+            if (vehicles.isEmpty()) {
+                observations.add("El alto sobrepasa el máximo permitido.");
+            }
             vehicles = vehicles
                     .stream()
-                    .filter(vehicleType -> vehicleType.getMaxWeight() >= item.getWeight())
+                    .filter(vehicleType -> vehicleType.getMaxWeight() >= item.getWeight()/1000)
                     .collect(Collectors.toList());
-            item.setObservations(Arrays.asList("total: " + vehicles.size(), vehicles.toString()));
+            if (vehicles.isEmpty()) {
+                observations.add("El peso sobrepasa el máximo permitido.");
+            } else {
+                var vehicle = vehicles.get(0);
+                item.setAvailableVehicle(vehicle.getName().concat(" ").concat(vehicle.getConfiguration()));
+            }
+            item.setObservations(observations);
         }
         return items;
     }
