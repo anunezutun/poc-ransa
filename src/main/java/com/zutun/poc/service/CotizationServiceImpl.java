@@ -130,28 +130,28 @@ public class CotizationServiceImpl implements CotizationService {
                 .filter(vehicleType -> vehicleType.getMaxDepth() >= item.getDepth())
                 .collect(Collectors.toList());
         if (vehicles.isEmpty()) {
-            observations.add("La longitud sobrepasa el máximo permitido.");
+            observations.add("La longitud sobrepasa el maximo permitido.");
         }
         vehicles = vehicles
                 .stream()
                 .filter(vehicleType -> vehicleType.getMaxWidth() >= item.getWidth())
                 .collect(Collectors.toList());
         if (vehicles.isEmpty()) {
-            observations.add("El ancho sobrepasa el máximo permitido.");
+            observations.add("El ancho sobrepasa el maximo permitido.");
         }
         vehicles = vehicles
                 .stream()
                 .filter(vehicleType -> vehicleType.getMaxHeight() >= item.getHeight())
                 .collect(Collectors.toList());
         if (vehicles.isEmpty()) {
-            observations.add("El alto sobrepasa el máximo permitido.");
+            observations.add("El alto sobrepasa el maximo permitido.");
         }
         vehicles = vehicles
                 .stream()
                 .filter(vehicleType -> vehicleType.getMaxWeight() >= item.getWeight()/1000)
                 .collect(Collectors.toList());
         if (vehicles.isEmpty()) {
-            observations.add("El peso sobrepasa el máximo permitido.");
+            observations.add("El peso sobrepasa el maximo permitido.");
         } else {
             var vehicle = vehicles.get(0);
             item.setAvailableVehicle(vehicle.getName().concat(" ").concat(vehicle.getConfiguration()));
