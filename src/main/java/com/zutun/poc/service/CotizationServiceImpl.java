@@ -93,8 +93,6 @@ public class CotizationServiceImpl implements CotizationService {
 
             while ((line = bufferedReader.readLine()) != null) {
 
-                // Se eliminan los espacios y se separan los valores
-                line = line.replaceAll("\\s", "");
                 String[] columns = line.split(",");
 
                 Item item = chooseVehicle(Item.builder().order(columns[ORDER_POSITION])
