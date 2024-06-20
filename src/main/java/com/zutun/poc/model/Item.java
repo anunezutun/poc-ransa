@@ -1,9 +1,14 @@
 package com.zutun.poc.model;
 
-import lombok.Builder;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,6 +16,8 @@ import lombok.ToString;
 @Setter
 @Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Item {
 
     private String order;
@@ -24,6 +31,9 @@ public class Item {
     private List<String> observations = new ArrayList<>();
 
     public Double getVolume() {
-        return this.getDepth() * this.getWidth() * this.getHeight();
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.UP);
+        var volume = this.getDepth() * this.getWidth() * this.getHeight();
+        return Double.parseDouble(df.format(volume));
     }
 }

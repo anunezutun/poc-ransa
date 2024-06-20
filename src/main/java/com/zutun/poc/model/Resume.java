@@ -9,6 +9,7 @@ import lombok.Setter;
 public class Resume {
     private List<Assignation> assignations;
     private Integer totalItems;
-    private Integer totalAssignations;
+    private Integer totalSuccessItems;
     private Integer totalErrorItems;
+    private Double volumeTotal;
 }

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,4 +34,27 @@ public class Vehicle implements Cloneable{
     public String getVehicleFullName() {
         return this.getName().concat(" ").concat(this.getConfiguration());
     }
+
+    public String getVehicleInfo() {
+        return String.format("%s %s-%s",
+                this.id,
+                this.name,
+                this.configuration);
+    }
+
+    public String getDimensions() {
+        return String.format("Long:%s Ancho:%s Alto:%s Peso max:%s Tn",
+                this.maxDepth,
+                this.maxWidth,
+                this.maxHeight,
+                this.maxWeight);
+    }
+
+    public Double getVolume() {
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.UP);
+        var volume = this.maxDepth * this.maxWidth * this.maxHeight;
+        return Double.parseDouble(df.format(volume));
+    }
+
 }
