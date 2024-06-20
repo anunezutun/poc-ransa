@@ -55,9 +55,8 @@ public class QuotationController {
     }
 
     HttpHeaders headers = new HttpHeaders();
-    var name = file.getName();
-    String reportFileName = "resultado".concat(".xlsx");
-    headers.add("Content-Disposition", "attachment; filename=" + reportFileName);
+    var filename = "RESULTADO-" + file.getOriginalFilename();
+    headers.add("Content-Disposition", "attachment; filename=" + filename);
 
     return ResponseEntity
             .ok()

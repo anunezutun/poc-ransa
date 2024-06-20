@@ -104,7 +104,7 @@ public class ExcelFileExporter {
       for (Map.Entry<String,Integer> entry : resume.getFrequencyVehicles().entrySet()) {
         indexRow++;
         dataRow = sheet.createRow(indexRow);
-        dataRow.createCell(0).setCellValue(" >" + entry.getKey());
+        dataRow.createCell(0).setCellValue("  " + entry.getKey());
         dataRow.createCell(1).setCellValue(entry.getValue());
       }
       workbook.write(out);
