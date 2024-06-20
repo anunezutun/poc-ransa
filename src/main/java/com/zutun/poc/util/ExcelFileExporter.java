@@ -25,7 +25,7 @@ public class ExcelFileExporter {
 
   public static ByteArrayInputStream loadFile(List<Item> items, Resume resume) {
     try (Workbook workbook = new XSSFWorkbook();
-         ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
       Font headerFont = workbook.createFont();
       headerFont.setBold(true);
@@ -38,6 +38,12 @@ public class ExcelFileExporter {
       Row headerRow = sheet.createRow(0);
 
       List<String> headersReport = REPORT_HEADERS;
+
+      Font observationFont = workbook.createFont();
+      observationFont.setColor(IndexedColors.RED.getIndex());
+
+      CellStyle observationCellStyle = workbook.createCellStyle();
+      observationCellStyle.setFont(observationFont);
 
       Cell cell;
       int indexHeader = 0;
@@ -54,23 +60,52 @@ public class ExcelFileExporter {
 
         Row dataRow = sheet.createRow(indexRow + 1);
 
-        dataRow.createCell(indexColumn).setCellValue(item.getOrder());
-        dataRow.createCell(++indexColumn).setCellValue(item.getDescription());
-        dataRow.createCell(++indexColumn).setCellValue(item.getDepth());
-        dataRow.createCell(++indexColumn).setCellValue(item.getWidth());
-        dataRow.createCell(++indexColumn).setCellValue(item.getHeight());
-        dataRow.createCell(++indexColumn).setCellValue(item.getWeight());
-        dataRow.createCell(++indexColumn).setCellValue(item.getVolume());
-        dataRow.createCell(++indexColumn).setCellValue(Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getVehicleInfo());
-        dataRow.createCell(++indexColumn).setCellValue(Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getDimensions());
-        dataRow.createCell(++indexColumn).setCellValue(Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getVolume().toString());
-        dataRow.createCell(++indexColumn).setCellValue(Objects.isNull(item.getObservations()) ? "" : item.getObservations().get(0));
+        Cell order = dataRow.createCell(indexColumn);
+        order.setCellValue(item.getOrder());
+        Cell description = dataRow.createCell(++indexColumn);
+        description.setCellValue(item.getDescription());
+        Cell depth = dataRow.createCell(++indexColumn);
+        depth.setCellValue(item.getDepth());
+        Cell width = dataRow.createCell(++indexColumn);
+        width.setCellValue(item.getWidth());
+        Cell heigth = dataRow.createCell(++indexColumn);
+        heigth.setCellValue(item.getHeight());
+        Cell weight = dataRow.createCell(++indexColumn);
+        weight.setCellValue(item.getWeight());
+        Cell volume = dataRow.createCell(++indexColumn);
+        volume.setCellValue(item.getVolume());
+        dataRow
+            .createCell(++indexColumn)
+            .setCellValue(
+                Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getVehicleInfo());
+        dataRow
+            .createCell(++indexColumn)
+            .setCellValue(
+                Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getDimensions());
+        dataRow
+            .createCell(++indexColumn)
+            .setCellValue(
+                Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getVolume().toString());
+
+        if (!Objects.isNull(item.getObservations())) {
+          Cell observations = dataRow.createCell(++indexColumn);
+          observations.setCellValue(
+              Objects.isNull(item.getObservations()) ? "" : item.getObservations().get(0));
+
+          order.setCellStyle(observationCellStyle);
+          description.setCellStyle(observationCellStyle);
+          depth.setCellStyle(observationCellStyle);
+          width.setCellStyle(observationCellStyle);
+          heigth.setCellStyle(observationCellStyle);
+          weight.setCellStyle(observationCellStyle);
+          volume.setCellStyle(observationCellStyle);
+          observations.setCellStyle(observationCellStyle);
+        }
 
         indexRow++;
       }
 
-
-      //Resume
+      // Resume
       indexRow = indexRow + 2;
       Row dataRow = sheet.createRow(indexRow);
       dataRow.createCell(0).setCellValue("RESUMEN");
@@ -105,8 +140,7 @@ public class ExcelFileExporter {
       dataRow.createCell(0).setCellValue("Número de vehiculos a utilizar ");
       dataRow.createCell(1).setCellValue(resume.getAssignations().size());
 
-
-      for (Map.Entry<String,Integer> entry : resume.getFrequencyVehicles().entrySet()) {
+      for (Map.Entry<String, Integer> entry : resume.getFrequencyVehicles().entrySet()) {
         indexRow++;
         dataRow = sheet.createRow(indexRow);
         dataRow.createCell(0).setCellValue("  " + entry.getKey());
@@ -115,7 +149,7 @@ public class ExcelFileExporter {
       workbook.write(out);
       return new ByteArrayInputStream(out.toByteArray());
     } catch (IOException e) {
-        throw new RuntimeException(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -134,5 +168,4 @@ public class ExcelFileExporter {
     reportHeaders.add("Observaciones");
     return reportHeaders;
   }
-
 }
