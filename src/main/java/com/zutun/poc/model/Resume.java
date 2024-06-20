@@ -13,6 +13,7 @@ public class Resume {
     private Integer totalItems;
     private Integer totalSuccessItems;
     private Integer totalErrorItems;
-    private Double volumeTotal;
+    private Double totalVolume;
+    private Double totalWeight;
     Map<String, Integer> frequencyVehicles;
 }

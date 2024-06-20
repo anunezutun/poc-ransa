@@ -93,7 +93,12 @@ public class ExcelFileExporter {
       indexRow++;
       dataRow = sheet.createRow(indexRow);
       dataRow.createCell(0).setCellValue("Volumen total a transportar ");
-      dataRow.createCell(1).setCellValue(resume.getVolumeTotal());
+      dataRow.createCell(1).setCellValue(resume.getTotalVolume());
+
+      indexRow++;
+      dataRow = sheet.createRow(indexRow);
+      dataRow.createCell(0).setCellValue("Peso total a transportar ");
+      dataRow.createCell(1).setCellValue(resume.getTotalWeight() + " Tn.");
 
       indexRow++;
       dataRow = sheet.createRow(indexRow);

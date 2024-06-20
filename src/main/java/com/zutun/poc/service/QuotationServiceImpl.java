@@ -8,6 +8,8 @@ import com.zutun.poc.model.Vehicle;
 import com.zutun.poc.util.Excel;
 import com.zutun.poc.util.GeneratorId;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,16 +46,17 @@ public class QuotationServiceImpl implements QuotationService {
 
     private void setResume(List<Item> items, Resume resume) {
         resume.setTotalItems(items.size());
-        items = items.stream()
-                .filter(item -> Objects.nonNull(item.getVehicle()))
-                .collect(Collectors.toList());
         var errorItems = items.stream()
                 .filter(item -> Objects.isNull(item.getVehicle()))
                 .collect(Collectors.toList()).size();
+        items = items.stream()
+                .filter(item -> Objects.nonNull(item.getVehicle()))
+                .collect(Collectors.toList());
         var totalAssignations = items.size();
         resume.setTotalErrorItems(errorItems);
         resume.setTotalSuccessItems(totalAssignations);
-        resume.setVolumeTotal(calculateTotalVolume(items));
+        resume.setTotalVolume(calculateTotalVolume(items));
+        resume.setTotalWeight(calculateTotalWeight(items));
         try {
             calculateVehicles(items, resume);
             calculateQuantityVehicles(resume);
@@ -80,9 +83,21 @@ public class QuotationServiceImpl implements QuotationService {
     }
 
     private Double calculateTotalVolume(List<Item> items) {
-        return items.stream()
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.UP);
+        var totalVolume = items.stream()
                 .mapToDouble(item -> item.getVolume())
                 .sum();
+        return Double.parseDouble(df.format(totalVolume));
+    }
+
+    private Double calculateTotalWeight(List<Item> items) {
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.UP);
+        var totalWeight = items.stream()
+                .mapToDouble(item -> item.getWeight())
+                .sum()/1000;
+        return Double.parseDouble(df.format(totalWeight));
     }
 
     private void calculateVehicles(List<Item> items, Resume resume) throws CloneNotSupportedException {
