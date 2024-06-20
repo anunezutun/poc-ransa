@@ -10,6 +10,8 @@ import com.zutun.poc.util.GeneratorId;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,9 +56,27 @@ public class QuotationServiceImpl implements QuotationService {
         resume.setVolumeTotal(calculateTotalVolume(items));
         try {
             calculateVehicles(items, resume);
+            calculateQuantityVehicles(resume);
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void calculateQuantityVehicles(Resume resume) {
+
+        List<String> vehicles = resume.getAssignations().stream()
+                .map(assignation -> assignation.getVehicle())
+                .map(vehicle -> vehicle.getVehicleFullName())
+                .collect(Collectors.toList());
+        Map<String, Integer> frequencyVehicles = new HashMap<>();
+        for (Assignation assignation : resume.getAssignations()) {
+            var vehicleName = assignation.getVehicle().getVehicleFullName();
+            var frequency = Collections.frequency(vehicles, vehicleName);
+            if (Objects.isNull(frequencyVehicles.get(vehicleName))) {
+                frequencyVehicles.put(vehicleName, frequency);
+            }
+        }
+        resume.setFrequencyVehicles(frequencyVehicles);
     }
 
     private Double calculateTotalVolume(List<Item> items) {

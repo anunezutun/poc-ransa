@@ -5,9 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
-import com.zutun.poc.model.Assignation;
 import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,7 +29,7 @@ public class ExcelFileExporter {
 
       Font headerFont = workbook.createFont();
       headerFont.setBold(true);
-      headerFont.setColor(IndexedColors.BLUE.getIndex());
+      headerFont.setColor(IndexedColors.BLACK.getIndex());
 
       CellStyle headerCellStyle = workbook.createCellStyle();
       headerCellStyle.setFont(headerFont);
@@ -102,6 +101,12 @@ public class ExcelFileExporter {
       dataRow.createCell(1).setCellValue(resume.getAssignations().size());
 
 
+      for (Map.Entry<String,Integer> entry : resume.getFrequencyVehicles().entrySet()) {
+        indexRow++;
+        dataRow = sheet.createRow(indexRow);
+        dataRow.createCell(0).setCellValue(" >" + entry.getKey());
+        dataRow.createCell(1).setCellValue(entry.getValue());
+      }
       workbook.write(out);
       return new ByteArrayInputStream(out.toByteArray());
     } catch (IOException e) {
