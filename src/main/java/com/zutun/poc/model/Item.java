@@ -20,7 +20,10 @@ public class Item {
     private Double height;
     private Double weight;
     private Boolean stackable;
-    private String availableVehicle;
+    private Vehicle vehicle;
     private List<String> observations = new ArrayList<>();
 
+    public Double getVolume() {
+        return this.getDepth() * this.getWidth() * this.getHeight();
+    }
 }

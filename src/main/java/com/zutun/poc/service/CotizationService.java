@@ -9,5 +9,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface CotizationService {
     public List<Item> chooseVehicle(List<Item> items);
     File createQuotation(MultipartFile file);
-    public Item chooseVehicle(Item item);
+    public Item chooseVehicle(Item item, List<Item> items);
 }

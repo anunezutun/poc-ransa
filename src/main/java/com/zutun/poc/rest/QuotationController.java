@@ -26,7 +26,6 @@ public class QuotationController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ByteArrayResource> createQuotation(
       @RequestPart(value = "quotation") MultipartFile quotation) throws IOException {
-    cotizationService.createQuotation(quotation);
     ByteArrayResource fileResponse =
         new ByteArrayResource(
             FileUtils.readFileToByteArray(cotizationService.createQuotation(quotation)));
