@@ -77,7 +77,7 @@ public class ExcelFileExporter {
         dataRow
             .createCell(++indexColumn)
             .setCellValue(
-                Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getVehicleInfo());
+                Objects.isNull(item.getVehicle()) ? "" : "#" + item.getVehicle().getVehicleInfo());
         dataRow
             .createCell(++indexColumn)
             .setCellValue(

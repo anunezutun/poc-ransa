@@ -143,7 +143,7 @@ public class QuotationServiceImpl implements QuotationService {
         Vehicle newVehicle;
         try {
             newVehicle = (Vehicle) vehicle.clone();
-            newVehicle.setId(generateId());
+            newVehicle.setId(generateId(assignationList).toString());
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
@@ -153,6 +153,14 @@ public class QuotationServiceImpl implements QuotationService {
         assignationList.add(assignation);
 
         items.forEach(item -> item.setVehicle(newVehicle));
+    }
+
+    private Integer generateId(List<Assignation> assignationList) {
+        if (assignationList.isEmpty()) {
+            return 1;
+        } else {
+            return Integer.parseInt(assignationList.get(assignationList.size() - 1).getVehicle().getId()) + 1;
+        }
     }
 
     private List<List<Item>> groupVehicles(List<Item> items) {
