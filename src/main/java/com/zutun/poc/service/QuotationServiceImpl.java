@@ -222,7 +222,7 @@ public class QuotationServiceImpl implements QuotationService {
                 }
             });
             if (availableVehicle.isEmpty()) {
-                item.setObservations(Arrays.asList("El item no cumple con las dimensiones maximas"));
+                item.setObservations(Arrays.asList("El item excede las dimensiones maximas"));
             } else {
                 var vehicle = availableVehicle.get(0);
                 item.setVehicle(vehicle);
