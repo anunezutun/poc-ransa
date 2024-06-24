@@ -2,18 +2,12 @@ package com.zutun.poc.rest;
 
 import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
-import com.zutun.poc.service.CotizationService;
-import java.io.IOException;
-import java.util.List;
-
 import com.zutun.poc.service.QuotationService;
 import com.zutun.poc.util.ExcelFileExporter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,22 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin
 public class QuotationController {
 
-  private final CotizationService cotizationService;
   private final QuotationService quotationService;
-
-  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ByteArrayResource> createQuotation(
-      @RequestPart(value = "quotation") MultipartFile quotation) throws IOException {
-    ByteArrayResource fileResponse =
-        new ByteArrayResource(
-            FileUtils.readFileToByteArray(cotizationService.createQuotation(quotation)));
-    return ResponseEntity.ok()
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=Cotizacion.csv")
-        .header("Content-type", "application/octet-stream")
-        .contentLength(fileResponse.contentLength())
-        .body(fileResponse);
-  }
 
   @PostMapping("/load")
   public ResponseEntity<InputStreamResource> bulkLoad(
@@ -63,4 +42,14 @@ public class QuotationController {
             .headers(headers)
             .body(new InputStreamResource(ExcelFileExporter.loadFile(items, resume)));
   }
+
+  @PostMapping("v2/load")
+  public ResponseEntity<InputStreamResource> loadDynamicXls(
+          @RequestPart(value = "file") MultipartFile file) {
+    if (file != null) {
+      quotationService.processDynamicXls(file);
+    }
+    return null;
+  }
+
 }

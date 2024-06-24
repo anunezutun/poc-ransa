@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class QuotationServiceImpl implements QuotationService {
 
+    private final VehicleCalculationService vehicleCalculationService;
+
     @Override
     public List<Item> processFile(MultipartFile file, Resume resume) {
         List<Item> items;
@@ -42,6 +44,11 @@ public class QuotationServiceImpl implements QuotationService {
             throw new RuntimeException(e);
         }
         return items;
+    }
+
+    @Override
+    public void processDynamicXls(MultipartFile file) {
+        vehicleCalculationService.calculate(file);
     }
 
     private void setResume(List<Item> items, Resume resume) {
