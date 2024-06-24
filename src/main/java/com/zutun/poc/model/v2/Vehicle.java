@@ -1,14 +1,12 @@
 package com.zutun.poc.model.v2;
 
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
 @Getter
 @Setter
@@ -20,10 +18,10 @@ public class Vehicle implements Cloneable {
     private String id;
     private String name;
     private String configuration;
-    private Double maxDepth;
-    private Double maxWidth;
-    private Double maxHeight;
-    private Double maxWeight;
+    private BigDecimal maxDepth;
+    private BigDecimal maxWidth;
+    private BigDecimal maxHeight;
+    private BigDecimal maxWeight;
     private Integer maxItems;
     private Integer priority;
     private Integer maxUnitsAvailable;
@@ -50,13 +48,6 @@ public class Vehicle implements Cloneable {
                 this.maxWidth,
                 this.maxHeight,
                 this.maxWeight);
-    }
-
-    public Double getVolume() {
-        DecimalFormat df = new DecimalFormat("0.00");
-        df.setRoundingMode(RoundingMode.UP);
-        var volume = this.maxDepth * this.maxWidth * this.maxHeight;
-        return Double.parseDouble(df.format(volume));
     }
 
 }

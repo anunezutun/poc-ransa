@@ -1,6 +1,6 @@
 package com.zutun.poc.model.v2;
 
-import com.zutun.poc.model.Vehicle;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -22,17 +22,11 @@ public class Item {
 
     private String order;
     private String description;
-    private Double depth;
-    private Double width;
-    private Double height;
-    private Double weight;
+    private BigDecimal depth;
+    private BigDecimal width;
+    private BigDecimal height;
+    private BigDecimal weight;
     private Vehicle vehicle;
     private List<String> observations = new ArrayList<>();
 
-    public Double getVolume() {
-        DecimalFormat df = new DecimalFormat("0.00");
-        df.setRoundingMode(RoundingMode.UP);
-        var volume = this.getDepth() * this.getWidth() * this.getHeight();
-        return Double.parseDouble(df.format(volume));
-    }
 }

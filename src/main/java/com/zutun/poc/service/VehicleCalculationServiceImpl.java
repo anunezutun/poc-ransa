@@ -9,7 +9,9 @@ import com.zutun.poc.model.v2.Vehicle;
 import com.zutun.poc.util.Constants;
 import com.zutun.poc.util.Excel;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,32 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
 
     @Override
     public void calculate(MultipartFile file) {
+        Request request = getRequest(file);
+        unitConversion(request);
+        chooseVehicle(request);
+    }
+
+    private void unitConversion(Request request) {//convierte a la unidad estandar metro y tonelada
+
+        for (Item item : request.getItems()) {
+            var unitMeasurementInput = request.getRestriction().getUnitMeasurementInput();
+            var dimensionUnit = unitMeasurementInput.getDimension();
+            var weightUnit = unitMeasurementInput.getWeight();
+            var decimals = unitMeasurementInput.getDecimals();
+
+            item.setDepth(DimensionConverter
+                    .convert(item.getDepth(), dimensionUnit, "metro", decimals));
+            item.setWidth(DimensionConverter
+                    .convert(item.getWidth(), dimensionUnit, "metro", decimals));
+            item.setHeight(DimensionConverter
+                    .convert(item.getHeight(), dimensionUnit, "metro", decimals));
+            item.setWeight(WeightConverter
+                    .convert(item.getWeight(), weightUnit, "tonelada", decimals));
+        }
+        System.out.println(new Gson().toJson(request));
+    }
+
+    private Request getRequest(MultipartFile file) {
         try {
             var request = new Request();
             var restriction = new Restriction();
@@ -33,10 +61,10 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             setInformationVehicles(excel, restriction);
             setUnitMeasurement(excel, restriction);
             System.out.println(new Gson().toJson(request));
+            return request;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
-
     }
 
     private void setItems(Excel excel, Request request) {
@@ -48,10 +76,10 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             Item item = Item.builder()
                     .order(row.get(0))
                     .description(row.get(1))
-                    .depth(Double.parseDouble(row.get(2)))
-                    .width(Double.parseDouble(row.get(3)))
-                    .height(Double.parseDouble(row.get(4)))
-                    .weight(Double.parseDouble(row.get(5)))
+                    .depth(new BigDecimal(row.get(2)))
+                    .width(new BigDecimal(row.get(3)))
+                    .height(new BigDecimal(row.get(4)))
+                    .weight(new BigDecimal(row.get(5)))
                     .build();
 
             items.add(item);
@@ -83,15 +111,43 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             vehicles.add(Vehicle.builder()
                     .name(row.get(0))
                     .configuration(row.get(1))
-                    .maxDepth(Double.parseDouble(row.get(2)))
-                    .maxWidth(Double.parseDouble(row.get(3)))
-                    .maxHeight(Double.parseDouble(row.get(4)))
-                    .maxWeight(Double.parseDouble(row.get(5)))
+                    .maxDepth(new BigDecimal(row.get(2)))
+                    .maxWidth(new BigDecimal(row.get(3)))
+                    .maxHeight(new BigDecimal(row.get(4)))
+                    .maxWeight(new BigDecimal(row.get(5)))
                     .maxItems(Integer.parseInt(row.get(6)))
                     .priority(Integer.parseInt(row.get(7)))
                     .maxUnitsAvailable(Integer.parseInt(row.get(8)))
                     .build());
         }
         restriction.setVehicles(vehicles);
+    }
+
+    public void chooseVehicle(Request request) {
+        List<Item> items = request.getItems();
+        for (Item item : items) {
+            List<Vehicle> availableVehicle = getAvailableVehicle(request, item);
+            if (availableVehicle.isEmpty()) {
+                item.setObservations(Arrays.asList("El item excede las dimensiones maximas"));
+            } else {
+                var vehicle = availableVehicle.get(0);
+                item.setVehicle(vehicle);
+            }
+        }
+        System.out.println(new Gson().toJson(request.getItems()));
+    }
+
+    private static List<Vehicle> getAvailableVehicle(Request request, Item item) {
+        var vehicles = request.getRestriction().getVehicles();
+        List<Vehicle> availableVehicle = new ArrayList<>();
+        vehicles.forEach(vehicle -> {
+            if (vehicle.getMaxDepth().compareTo(item.getDepth()) >= 0
+                    && vehicle.getMaxWidth().compareTo(item.getWidth()) >= 0
+                    && vehicle.getMaxHeight().compareTo(item.getHeight()) >= 0
+                    && vehicle.getMaxWeight().compareTo(item.getWeight()) >= 0) {
+                availableVehicle.add(vehicle);
+            }
+        });
+        return availableVehicle;
     }
 }
