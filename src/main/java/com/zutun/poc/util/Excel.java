@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -57,6 +58,46 @@ public class Excel {
     return rows;
   }
 
+  public List<Map<Integer, String>> getCellBlock(Integer indexTab,
+                                                 Integer firstRow,
+                                                 Integer lastColumn) {
+    List<Map<Integer, String>> rows = new ArrayList<>();
+    Sheet sheet = excelWorkbook.getSheetAt(indexTab);
+
+    int indexRow = 0;
+    for (Row row : sheet) {
+      if (indexRow >= firstRow) {
+        Map<Integer, String> rowData = new HashMap<>();
+        int indexColumn = 0;
+        for (int i = 0; i < lastColumn; i++) {
+          Cell cell = row.getCell(i, RETURN_BLANK_AS_NULL);
+          if (cell == null) {
+            rowData.put(indexColumn, "");
+          } else {
+            rowData.put(indexColumn, getExcelField(cell));
+          }
+          indexColumn++;
+        }
+        rows.add(rowData);
+      }
+      indexRow++;
+    }
+    return rows;
+  }
+
+  public Object getCellValue(Integer indexTab, Integer rowIndex, Integer colIndex) {
+    Sheet sheet = excelWorkbook.getSheetAt(indexTab);
+    Row row = sheet.getRow(rowIndex);
+    Object unitMeasurement = null;
+    if (row != null) {
+      Cell cell = row.getCell(colIndex, RETURN_BLANK_AS_NULL);
+      if (Objects.nonNull(cell)) {
+        unitMeasurement = getExcelField(cell);
+      }
+    }
+    return unitMeasurement;
+  }
+
   private String getExcelField(Cell cell) {
     switch (cell.getCellType()) {
       case STRING:
@@ -75,7 +116,7 @@ public class Excel {
     if (value == intValue) {
       numeric = String.format("%d", intValue);
     } else {
-      numeric = String.format(Locale.US, "%.3f", value);
+      numeric = String.format(Locale.US, "%.2f", value);
     }
     return numeric;
   }

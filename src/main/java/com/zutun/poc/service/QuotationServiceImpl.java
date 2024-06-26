@@ -5,6 +5,7 @@ import com.zutun.poc.model.Assignation;
 import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
 import com.zutun.poc.model.Vehicle;
+import com.zutun.poc.model.v2.ResponseDto;
 import com.zutun.poc.util.Excel;
 import com.zutun.poc.util.GeneratorId;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class QuotationServiceImpl implements QuotationService {
 
+    private final VehicleCalculationService vehicleCalculationService;
+
     @Override
     public List<Item> processFile(MultipartFile file, Resume resume) {
         List<Item> items;
@@ -42,6 +45,11 @@ public class QuotationServiceImpl implements QuotationService {
             throw new RuntimeException(e);
         }
         return items;
+    }
+
+    @Override
+    public ResponseDto processDynamicXls(MultipartFile file) {
+        return vehicleCalculationService.calculate(file);
     }
 
     private void setResume(List<Item> items, Resume resume) {
