@@ -2,9 +2,12 @@ package com.zutun.poc.rest;
 
 import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
+import com.zutun.poc.model.v2.ResponseDto;
 import com.zutun.poc.service.QuotationService;
 import com.zutun.poc.util.ExcelFileExporter;
 import java.util.List;
+
+import com.zutun.poc.util.ExcelFileExporterV2;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -46,12 +49,18 @@ public class QuotationController {
   @PostMapping("v2/load")
   public ResponseEntity<InputStreamResource> loadDynamicXls(
           @RequestPart(value = "file") MultipartFile file) {
-    List<com.zutun.poc.model.v2.Item> items = null;
-    com.zutun.poc.model.v2.Resume resume = new com.zutun.poc.model.v2.Resume();
+    ResponseDto responseDto = new ResponseDto();
     if (file != null) {
-      items = quotationService.processDynamicXls(file, resume);
+      responseDto = quotationService.processDynamicXls(file);
     }
-    return null;
+    HttpHeaders headers = new HttpHeaders();
+    var filename = "RESULTADO-" + file.getOriginalFilename();
+    headers.add("Content-Disposition", "attachment; filename=" + filename);
+
+    return ResponseEntity
+            .ok()
+            .headers(headers)
+            .body(new InputStreamResource(ExcelFileExporterV2.loadFile(responseDto.getFixingItem().getItems(), responseDto.getResume())));
   }
 
 }

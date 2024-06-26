@@ -5,6 +5,7 @@ import com.zutun.poc.model.Assignation;
 import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
 import com.zutun.poc.model.Vehicle;
+import com.zutun.poc.model.v2.ResponseDto;
 import com.zutun.poc.util.Excel;
 import com.zutun.poc.util.GeneratorId;
 import java.io.IOException;
@@ -47,8 +48,8 @@ public class QuotationServiceImpl implements QuotationService {
     }
 
     @Override
-    public List<com.zutun.poc.model.v2.Item> processDynamicXls(MultipartFile file, com.zutun.poc.model.v2.Resume resume) {
-        return vehicleCalculationService.calculate(file, resume);
+    public ResponseDto processDynamicXls(MultipartFile file) {
+        return vehicleCalculationService.calculate(file);
     }
 
     private void setResume(List<Item> items, Resume resume) {

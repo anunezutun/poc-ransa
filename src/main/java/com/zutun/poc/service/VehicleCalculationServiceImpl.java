@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.zutun.poc.model.v2.Assignation;
 import com.zutun.poc.model.v2.Item;
 import com.zutun.poc.model.v2.RequestDto;
+import com.zutun.poc.model.v2.ResponseDto;
 import com.zutun.poc.model.v2.Restriction;
 import com.zutun.poc.model.v2.Resume;
 import com.zutun.poc.model.v2.FixingItem;
@@ -33,14 +34,20 @@ import org.springframework.web.multipart.MultipartFile;
 public class VehicleCalculationServiceImpl implements VehicleCalculationService {
 
     @Override
-    public List<Item> calculate(MultipartFile file, Resume resume) {
-        RequestDto requestDto = getRequest(file); //captura la informacion del xls sin modificaciones
-        FixingItem fixingItem = sizingBuilder(requestDto); //se hace una copia para trabajar por separado
+    public ResponseDto calculate(MultipartFile file) {
+        RequestDto requestDto = getRequest(file);
+        FixingItem fixingItem = sizingBuilder(requestDto);
         unitConversion(fixingItem);
         assignVehicle(fixingItem);
+        var resume = new Resume();
         setResume(fixingItem.getItems(), resume);//queda calcular las dimensiones de salida
         System.out.println(new Gson().toJson(fixingItem));
-        return fixingItem.getItems();
+
+        var responseDto = new ResponseDto();
+        responseDto.setResume(resume);
+        responseDto.setRequestDto(requestDto);
+        responseDto.setFixingItem(fixingItem);
+        return responseDto;
     }
 
     private FixingItem sizingBuilder(RequestDto requestDto) {
@@ -262,9 +269,12 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                 //para no apilables
                 var vehicleDepth = groupItems.get(0).getVehicle().getMaxDepth();
                 var vehicleWeight = groupItems.get(0).getVehicle().getMaxWeight();
+                var vehicleMaxItems = groupItems.get(0).getVehicle().getMaxItems();
                 var firstItem = groupItems.get(0);
                 var initialDepth = firstItem.getDepth();
                 var initialWeigth = firstItem.getWeight();
+                var initialCountItems = 1;
+
                 List<Item> joinItems = new ArrayList<>();
                 joinItems.add(firstItem);
                 var vehicle = firstItem.getVehicle();
@@ -274,7 +284,10 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                     var totalDepth = initialDepth.add(nextDepth);
                     var nextWeight = currentItem.getWeight();
                     var totalWeight = initialWeigth.add(nextWeight);
-                    if (totalDepth.compareTo(vehicleDepth) < 0 && totalWeight.compareTo(vehicleWeight) < 0) {
+                    initialCountItems ++;
+                    if (totalDepth.compareTo(vehicleDepth) < 0
+                            && totalWeight.compareTo(vehicleWeight) < 0
+                            && initialCountItems <= vehicleMaxItems) {
                         initialDepth = totalDepth;
                         initialWeigth = totalWeight;
                         joinItems.add(currentItem);
@@ -284,6 +297,7 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                         joinItems = new ArrayList<>();
                         initialDepth = currentItem.getDepth();
                         initialWeigth = currentItem.getWeight();
+                        initialCountItems = 1;
                         joinItems.add(currentItem);
                     }
                 }
