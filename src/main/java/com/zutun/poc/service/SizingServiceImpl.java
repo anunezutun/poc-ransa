@@ -6,7 +6,6 @@ import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
 import com.zutun.poc.model.Vehicle;
 import com.zutun.poc.util.Excel;
-import com.zutun.poc.util.GeneratorId;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -117,17 +116,18 @@ public class SizingServiceImpl implements SizingService {
         var vehicleDepth = groupItems.get(0).getVehicle().getMaxDepth();
         var vehicleWeight = groupItems.get(0).getVehicle().getMaxWeight();
         var firstItem = groupItems.get(0);
-        var initialDepth = firstItem.getDepth();
+        var initialDepth = firstItem.getWidth();
         var initialWeigth = firstItem.getWeight();
         List<Item> joinItems = new ArrayList<>();
         joinItems.add(firstItem);
         var vehicle = firstItem.getVehicle();
         for (int i = 1; i < groupItems.size(); i++) {
           var currentItem = groupItems.get(i);
-          var nextDepth = currentItem.getDepth();
+          var nextDepth = currentItem.getWidth();
           var totalDepth = initialDepth + nextDepth;
           var nextWeight = currentItem.getWeight();
           var totalWeight = initialWeigth + nextWeight;
+
           if (totalDepth < vehicleDepth && totalWeight < vehicleWeight) {
             initialDepth = totalDepth;
             initialWeigth = totalWeight;
@@ -137,8 +137,10 @@ public class SizingServiceImpl implements SizingService {
             //reiniciar
             joinItems = new ArrayList<>();
             initialDepth = currentItem.getDepth();
+            initialWeigth = currentItem.getWeight();
             joinItems.add(currentItem);
           }
+
         }
         addResume(assignationList, joinItems, vehicle);
       }

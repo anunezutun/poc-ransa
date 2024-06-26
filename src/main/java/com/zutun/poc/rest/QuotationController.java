@@ -3,6 +3,8 @@ package com.zutun.poc.rest;
 import com.zutun.poc.model.Item;
 import com.zutun.poc.model.Resume;
 import com.zutun.poc.service.CotizationService;
+import com.zutun.poc.service.SizingService;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class QuotationController {
 
   private final CotizationService cotizationService;
   private final QuotationService quotationService;
+  private final SizingService sizingService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ByteArrayResource> createQuotation(
@@ -49,9 +52,12 @@ public class QuotationController {
   public ResponseEntity<InputStreamResource> bulkLoad(
           @RequestPart(value = "file") MultipartFile file) {
     List<Item> items = null;
+    List<Item> itemsOptimized = null;
     Resume resume = new Resume();
+    Resume resumeOptimized = new Resume();
     if (file != null) {
       items = quotationService.processFile(file, resume);
+      itemsOptimized = sizingService.processFile(file, resumeOptimized);
     }
 
     HttpHeaders headers = new HttpHeaders();
@@ -61,6 +67,6 @@ public class QuotationController {
     return ResponseEntity
             .ok()
             .headers(headers)
-            .body(new InputStreamResource(ExcelFileExporter.loadFile(items, resume)));
+            .body(new InputStreamResource(ExcelFileExporter.loadFile(items, resume, itemsOptimized, resumeOptimized)));
   }
 }
