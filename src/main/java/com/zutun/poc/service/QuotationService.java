@@ -8,5 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface QuotationService {
     List<Item> processFile(MultipartFile file, Resume resume);
-    ResponseDto processDynamicXls(MultipartFile file);
+    ResponseDto processDynamicXls(MultipartFile file, Boolean optimized);
 }

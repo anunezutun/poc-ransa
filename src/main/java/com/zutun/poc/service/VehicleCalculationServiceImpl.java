@@ -34,13 +34,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class VehicleCalculationServiceImpl implements VehicleCalculationService {
 
     @Override
-    public ResponseDto calculate(MultipartFile file) {
+    public ResponseDto calculate(MultipartFile file, Boolean optimized) {
         RequestDto requestDto = getRequest(file);
         FixingItem fixingItem = sizingBuilder(requestDto);
         unitConversion(fixingItem);
         assignVehicle(fixingItem);
         var resume = new Resume();
-        setResume(fixingItem.getItems(), resume);//queda calcular las dimensiones de salida
+        setResume(fixingItem.getItems(), resume, optimized);//queda calcular las dimensiones de salida
         System.out.println(new Gson().toJson(fixingItem));
 
         var responseDto = new ResponseDto();
@@ -93,7 +93,7 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
         return fixingItem;
     }
 
-    private void setResume(List<Item> items, Resume resume) {
+    private void setResume(List<Item> items, Resume resume, Boolean optimized) {
         resume.setTotalItems(items.size());
         var errorItems = items.stream()
                 .filter(item -> Objects.isNull(item.getVehicle()))
@@ -105,12 +105,12 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
         resume.setTotalErrorItems(errorItems);
         resume.setTotalSuccessItems(totalAssignations);
         resume.setTotalWeight(calculateTotalWeight(items));
-        try {
+        if (Boolean.FALSE.equals(optimized)) {
             countVehicles(items, resume);
-            calculateQuantityVehicles(resume);
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+        } else {
+            countVehiclesOptimized(items, resume);
         }
+        calculateQuantityVehicles(resume);
     }
 
     private void calculateQuantityVehicles(Resume resume) {
@@ -256,7 +256,7 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
         }
     }
 
-    private void countVehicles(List<Item> items, Resume resume) throws CloneNotSupportedException {
+    private void countVehicles(List<Item> items, Resume resume) {
 
         List<Assignation> assignationList = new ArrayList<>();
         List<List<Item>> result = groupVehicles(items);
@@ -264,7 +264,7 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             if (groupItems.size() == 1) {
                 var item = groupItems.get(0);
                 Vehicle vehicle = item.getVehicle();
-                addResume(assignationList, Arrays.asList(item), vehicle);
+                addResume(assignationList, List.of(item), vehicle);
             } else {
                 //para no apilables
                 var vehicleDepth = groupItems.get(0).getVehicle().getMaxDepth();
@@ -296,6 +296,58 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                         //reiniciar
                         joinItems = new ArrayList<>();
                         initialDepth = currentItem.getDepth();
+                        initialWeigth = currentItem.getWeight();
+                        initialCountItems = 1;
+                        joinItems.add(currentItem);
+                    }
+                }
+                addResume(assignationList, joinItems, vehicle);
+            }
+        }
+        resume.setAssignations(assignationList);
+        System.out.println(new Gson().toJson(resume));
+    }
+
+    private void countVehiclesOptimized(List<Item> items, Resume resume) {
+
+        List<Assignation> assignationList = new ArrayList<>();
+        List<List<Item>> result = groupVehicles(items);
+        for (List<Item> groupItems : result) {
+            if (groupItems.size() == 1) {
+                var item = groupItems.get(0);
+                Vehicle vehicle = item.getVehicle();
+                addResume(assignationList, List.of(item), vehicle);
+            } else {
+                //para no apilables
+                var vehicleDepth = groupItems.get(0).getVehicle().getMaxDepth();
+                var vehicleWeight = groupItems.get(0).getVehicle().getMaxWeight();
+                var vehicleMaxItems = groupItems.get(0).getVehicle().getMaxItems();
+                var firstItem = groupItems.get(0);
+                var initialDepth = firstItem.getWidth();
+                var initialWeigth = firstItem.getWeight();
+                var initialCountItems = 1;
+
+                List<Item> joinItems = new ArrayList<>();
+                joinItems.add(firstItem);
+                var vehicle = firstItem.getVehicle();
+                for (int i = 1; i < groupItems.size(); i++) {
+                    var currentItem = groupItems.get(i);
+                    var nextDepth = currentItem.getWidth();
+                    var totalDepth = initialDepth.add(nextDepth);
+                    var nextWeight = currentItem.getWeight();
+                    var totalWeight = initialWeigth.add(nextWeight);
+                    initialCountItems ++;
+                    if (totalDepth.compareTo(vehicleDepth) < 0
+                        && totalWeight.compareTo(vehicleWeight) < 0
+                        && initialCountItems <= vehicleMaxItems) {
+                        initialDepth = totalDepth;
+                        initialWeigth = totalWeight;
+                        joinItems.add(currentItem);
+                    } else {
+                        addResume(assignationList, joinItems, vehicle);
+                        //reiniciar
+                        joinItems = new ArrayList<>();
+                        initialDepth = currentItem.getWidth();
                         initialWeigth = currentItem.getWeight();
                         initialCountItems = 1;
                         joinItems.add(currentItem);

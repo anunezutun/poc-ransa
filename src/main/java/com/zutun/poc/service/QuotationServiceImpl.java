@@ -48,8 +48,8 @@ public class QuotationServiceImpl implements QuotationService {
     }
 
     @Override
-    public ResponseDto processDynamicXls(MultipartFile file) {
-        return vehicleCalculationService.calculate(file);
+    public ResponseDto processDynamicXls(MultipartFile file, Boolean optimized) {
+        return vehicleCalculationService.calculate(file, optimized);
     }
 
     private void setResume(List<Item> items, Resume resume) {

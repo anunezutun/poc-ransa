@@ -56,8 +56,10 @@ public class QuotationController {
   public ResponseEntity<InputStreamResource> loadDynamicXls(
           @RequestPart(value = "file") MultipartFile file) {
     ResponseDto responseDto = new ResponseDto();
+    ResponseDto responseDtoOptimized = new ResponseDto();
     if (file != null) {
-      responseDto = quotationService.processDynamicXls(file);
+      responseDto = quotationService.processDynamicXls(file, Boolean.FALSE);
+      responseDtoOptimized = quotationService.processDynamicXls(file, Boolean.TRUE);
     }
     HttpHeaders headers = new HttpHeaders();
     var filename = "RESULTADO-" + file.getOriginalFilename();
@@ -66,7 +68,8 @@ public class QuotationController {
     return ResponseEntity
             .ok()
             .headers(headers)
-            .body(new InputStreamResource(ExcelFileExporterV2.loadFile(responseDto.getFixingItem().getItems(), responseDto.getResume())));
+            .body(new InputStreamResource(ExcelFileExporterV2.loadFile(responseDto.getFixingItem().getItems(),
+                responseDto.getResume(), responseDtoOptimized.getFixingItem().getItems(), responseDtoOptimized.getResume())));
   }
 
 }
