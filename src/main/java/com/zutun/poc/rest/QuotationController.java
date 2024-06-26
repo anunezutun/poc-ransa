@@ -46,8 +46,10 @@ public class QuotationController {
   @PostMapping("v2/load")
   public ResponseEntity<InputStreamResource> loadDynamicXls(
           @RequestPart(value = "file") MultipartFile file) {
+    List<com.zutun.poc.model.v2.Item> items = null;
+    com.zutun.poc.model.v2.Resume resume = new com.zutun.poc.model.v2.Resume();
     if (file != null) {
-      quotationService.processDynamicXls(file);
+      items = quotationService.processDynamicXls(file, resume);
     }
     return null;
   }

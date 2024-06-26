@@ -7,5 +7,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface QuotationService {
     List<Item> processFile(MultipartFile file, Resume resume);
-    void processDynamicXls(MultipartFile file);
+    List<com.zutun.poc.model.v2.Item> processDynamicXls(MultipartFile file, com.zutun.poc.model.v2.Resume resume);
 }

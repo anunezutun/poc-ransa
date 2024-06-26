@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Request {
+public class RequestDto {
     List<Item> items;
     Restriction restriction;
 }

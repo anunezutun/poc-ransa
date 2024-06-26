@@ -47,8 +47,8 @@ public class QuotationServiceImpl implements QuotationService {
     }
 
     @Override
-    public void processDynamicXls(MultipartFile file) {
-        vehicleCalculationService.calculate(file);
+    public List<com.zutun.poc.model.v2.Item> processDynamicXls(MultipartFile file, com.zutun.poc.model.v2.Resume resume) {
+        return vehicleCalculationService.calculate(file, resume);
     }
 
     private void setResume(List<Item> items, Resume resume) {
