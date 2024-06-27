@@ -159,6 +159,12 @@ public class ExcelFileExporterV2 {
       depth.setCellValue(item.getDepth().doubleValue());
       Cell width = dataRow.createCell(++indexColumn);
       width.setCellValue(item.getWidth().doubleValue());
+
+      if (Boolean.TRUE.equals(item.getIsRotated())){
+        depth.setCellValue(item.getWidth().doubleValue());
+        width.setCellValue(item.getDepth().doubleValue());
+      }
+
       Cell heigth = dataRow.createCell(++indexColumn);
       heigth.setCellValue(item.getHeight().doubleValue());
       Cell weight = dataRow.createCell(++indexColumn);
@@ -172,7 +178,7 @@ public class ExcelFileExporterV2 {
           .setCellValue(
               Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getDimensions());
 
-      if (!Objects.isNull(item.getObservations())) {
+      if (!Objects.isNull(item.getObservations()) || Boolean.TRUE.equals(item.getIsRotated())) {
         Cell observations = dataRow.createCell(++indexColumn);
         observations.setCellValue(
             Objects.isNull(item.getObservations()) ? "" : item.getObservations().get(0));

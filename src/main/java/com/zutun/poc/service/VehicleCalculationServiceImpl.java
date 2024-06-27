@@ -285,8 +285,8 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                     var nextWeight = currentItem.getWeight();
                     var totalWeight = initialWeigth.add(nextWeight);
                     initialCountItems ++;
-                    if (totalDepth.compareTo(vehicleDepth) < 0
-                            && totalWeight.compareTo(vehicleWeight) < 0
+                    if (totalDepth.compareTo(vehicleDepth) <= 0
+                            && totalWeight.compareTo(vehicleWeight) <= 0
                             && initialCountItems <= vehicleMaxItems) {
                         initialDepth = totalDepth;
                         initialWeigth = totalWeight;
@@ -320,10 +320,12 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             } else {
                 //para no apilables
                 var vehicleDepth = groupItems.get(0).getVehicle().getMaxDepth();
+                var vehicleWidth = groupItems.get(0).getVehicle().getMaxWidth();
                 var vehicleWeight = groupItems.get(0).getVehicle().getMaxWeight();
                 var vehicleMaxItems = groupItems.get(0).getVehicle().getMaxItems();
                 var firstItem = groupItems.get(0);
-                var initialDepth = firstItem.getWidth();
+                var initialDepth = firstItem.getDepth();
+                var initialWidth = firstItem.getWidth();
                 var initialWeigth = firstItem.getWeight();
                 var initialCountItems = 1;
 
@@ -332,13 +334,21 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                 var vehicle = firstItem.getVehicle();
                 for (int i = 1; i < groupItems.size(); i++) {
                     var currentItem = groupItems.get(i);
-                    var nextDepth = currentItem.getWidth();
+                    var nextDepth = currentItem.getDepth();
+
+                    if (currentItem.getDepth().compareTo(vehicleWidth) <= 0){
+                        initialDepth = initialWidth;
+                        nextDepth = currentItem.getWidth();
+                        firstItem.setIsRotated(Boolean.TRUE);
+                        currentItem.setIsRotated(Boolean.TRUE);
+                    }
+
                     var totalDepth = initialDepth.add(nextDepth);
                     var nextWeight = currentItem.getWeight();
                     var totalWeight = initialWeigth.add(nextWeight);
                     initialCountItems ++;
-                    if (totalDepth.compareTo(vehicleDepth) < 0
-                        && totalWeight.compareTo(vehicleWeight) < 0
+                    if (totalDepth.compareTo(vehicleDepth) <= 0
+                        && totalWeight.compareTo(vehicleWeight) <= 0
                         && initialCountItems <= vehicleMaxItems) {
                         initialDepth = totalDepth;
                         initialWeigth = totalWeight;
@@ -347,7 +357,8 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                         addResume(assignationList, joinItems, vehicle);
                         //reiniciar
                         joinItems = new ArrayList<>();
-                        initialDepth = currentItem.getWidth();
+                        initialDepth = currentItem.getDepth();
+                        initialWidth = currentItem.getWidth();
                         initialWeigth = currentItem.getWeight();
                         initialCountItems = 1;
                         joinItems.add(currentItem);

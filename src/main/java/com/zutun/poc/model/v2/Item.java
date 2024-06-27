@@ -28,5 +28,6 @@ public class Item {
     private BigDecimal weight;
     private Vehicle vehicle;
     private List<String> observations = new ArrayList<>();
+    private Boolean isRotated;
 
 }
