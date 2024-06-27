@@ -40,7 +40,6 @@ public class QuotationServiceImpl implements QuotationService {
             items = getItems(values);
             chooseVehicle(items);
             setResume(items, resume);
-            System.out.println(new Gson().toJson(items));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -144,7 +143,6 @@ public class QuotationServiceImpl implements QuotationService {
             }
         }
         resume.setAssignations(assignationList);
-        System.out.println(new Gson().toJson(resume));
     }
 
     private void addResume(List<Assignation> assignationList, List<Item> items, Vehicle vehicle) {

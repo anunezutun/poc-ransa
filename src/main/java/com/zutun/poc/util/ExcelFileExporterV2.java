@@ -3,8 +3,15 @@ package com.zutun.poc.util;
 import com.zutun.poc.model.v2.Item;
 import com.zutun.poc.model.v2.RequestDto;
 import com.zutun.poc.model.v2.ResponseDto;
-import com.zutun.poc.model.v2.Resume;
+import com.zutun.poc.model.v2.UnitMeasurement;
 import com.zutun.poc.model.v2.Vehicle;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -13,14 +20,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class ExcelFileExporterV2 {
 
@@ -31,18 +30,15 @@ public class ExcelFileExporterV2 {
   public static final List<String> RESTRICTION_HEADERS = getRestrictionHeaders();
 
   public static ByteArrayInputStream loadFile(ResponseDto responseDto, ResponseDto responseDtoOptimized) {
-    var items = responseDto.getFixingItem().getItems();
-    var resume = responseDto.getResume();
-    var itemsOptimized = responseDtoOptimized.getFixingItem().getItems();
-    var resumeOptimized = responseDtoOptimized.getResume();
+
     try (Workbook workbook = new XSSFWorkbook();
         ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
       Sheet sheet = workbook.createSheet(REPORT_LOAD_SHEET_NAME);
       Sheet sheetOptimized = workbook.createSheet(SIZING_SHEET_OPTIMIZED_NAME);
 
-      writeSheet(workbook, sheet, items, resume);
-      writeSheet(workbook, sheetOptimized, itemsOptimized, resumeOptimized);
+      writeSheet(workbook, sheet, responseDto);
+      writeSheet(workbook, sheetOptimized, responseDtoOptimized);
       writeRestrictionSheet(workbook, responseDto.getRequestDto());
 
       workbook.write(out);
@@ -61,7 +57,6 @@ public class ExcelFileExporterV2 {
     sizingHeaders.add("Alto (m)");
     sizingHeaders.add("Peso (Tn)");
     sizingHeaders.add("Tipo de Vehiculo");
-    sizingHeaders.add("Dimensiones Vehiculo");
     sizingHeaders.add("Observaciones");
     return sizingHeaders;
   }
@@ -119,14 +114,15 @@ public class ExcelFileExporterV2 {
     }
   }
 
-  private static void writeSheet(Workbook workbook, Sheet sheet, List<Item> items, Resume resume){
+  private static void writeSheet(Workbook workbook, Sheet sheet, ResponseDto response){
+    var items = response.getFixingItem().getItems();
+    var resume = response.getResume();
+    Font fontBlackAndBold = workbook.createFont();
+    fontBlackAndBold.setBold(true);
+    fontBlackAndBold.setColor(IndexedColors.BLACK.getIndex());
 
-    Font headerFont = workbook.createFont();
-    headerFont.setBold(true);
-    headerFont.setColor(IndexedColors.BLACK.getIndex());
-
-    CellStyle headerCellStyle = workbook.createCellStyle();
-    headerCellStyle.setFont(headerFont);
+    CellStyle cellStyleBlackAndBold = workbook.createCellStyle();
+    cellStyleBlackAndBold.setFont(fontBlackAndBold);
 
     Row headerRow = sheet.createRow(0);
 
@@ -141,10 +137,16 @@ public class ExcelFileExporterV2 {
     for (String header : SIZING_HEADERS) {
       cell = headerRow.createCell(indexHeader);
       cell.setCellValue(header);
-      cell.setCellStyle(headerCellStyle);
+      cell.setCellStyle(cellStyleBlackAndBold);
       indexHeader++;
     }
 
+    cell = headerRow.createCell(9);
+    cell.setCellValue("UNIDAD DE MEDIDA");
+    cell.setCellStyle(cellStyleBlackAndBold);
+
+    var unitMeasurementInput = response.getRequestDto().getRestriction()
+            .getUnitMeasurementInput();
     int indexRow = 0;
     for (Item item : items) {
       int indexColumn = 0;
@@ -173,10 +175,22 @@ public class ExcelFileExporterV2 {
           .createCell(++indexColumn)
           .setCellValue(
               Objects.isNull(item.getVehicle()) ? "" : "#" + item.getVehicle().getVehicleInfo());
-      dataRow
-          .createCell(++indexColumn)
-          .setCellValue(
-              Objects.isNull(item.getVehicle()) ? "" : item.getVehicle().getDimensions());
+
+      if (indexRow + 1 == 1) {
+        cell = dataRow.createCell(9);
+        cell.setCellValue("ENTRADA");
+        cell.setCellStyle(cellStyleBlackAndBold);
+      } else if (indexRow + 1 == 2) {
+        dataRow.createCell(9).setCellValue("Dimensiones");
+        dataRow.createCell(10).setCellValue(unitMeasurementInput.getDimension());
+      } else if (indexRow + 1 == 3) {
+        dataRow.createCell(9).setCellValue("Peso");
+        dataRow.createCell(10).setCellValue(unitMeasurementInput.getWeight());
+      } else if (indexRow + 1 == 4) {
+        dataRow.createCell(9).setCellValue("Decimales");
+        dataRow.createCell(10).setCellValue(unitMeasurementInput.getDecimals());
+      }
+
 
       if (!Objects.isNull(item.getObservations()) || Boolean.TRUE.equals(item.getIsRotated())) {
         Cell observations = dataRow.createCell(++indexColumn);
@@ -231,6 +245,5 @@ public class ExcelFileExporterV2 {
       dataRow.createCell(0).setCellValue("  " + entry.getKey());
       dataRow.createCell(1).setCellValue(entry.getValue());
     }
-
   }
 }

@@ -41,7 +41,6 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
         assignVehicle(fixingItem);
         var resume = new Resume();
         setResume(fixingItem.getItems(), resume, optimized);//queda calcular las dimensiones de salida
-        System.out.println(new Gson().toJson(fixingItem));
 
         var responseDto = new ResponseDto();
         responseDto.setResume(resume);
@@ -78,17 +77,17 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                         .build())
                 .collect(Collectors.toList()));
         var unitMeasurementInput = requestDto.getRestriction().getUnitMeasurementInput();
-        var unitMeasurementOutput = requestDto.getRestriction().getUnitMeasurementOutput();
+        //var unitMeasurementOutput = requestDto.getRestriction().getUnitMeasurementOutput();
         restriction.setUnitMeasurementInput(UnitMeasurement.builder()
                         .dimension(unitMeasurementInput.getDimension())
                         .weight(unitMeasurementInput.getWeight())
                         .decimals(unitMeasurementInput.getDecimals())
                 .build());
-        restriction.setUnitMeasurementOutput(UnitMeasurement.builder()
+        /*restriction.setUnitMeasurementOutput(UnitMeasurement.builder()
                         .dimension(unitMeasurementOutput.getDimension())
                         .weight(unitMeasurementOutput.getWeight())
                         .decimals(unitMeasurementOutput.getDecimals())
-                .build());
+                .build());*/
         fixingItem.setRestriction(restriction);
         return fixingItem;
     }
@@ -194,17 +193,17 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
 
     private void setUnitMeasurement(Excel excel, Restriction restriction) {
         restriction.setUnitMeasurementInput(UnitMeasurement.builder()
-                .dimension(excel.getCellValue(Constants.SIZING_TAB, 2, 8).toString())
-                .weight(excel.getCellValue(Constants.SIZING_TAB, 3, 8).toString())
+                .dimension(excel.getCellValue(Constants.SIZING_TAB, 2, 10).toString())
+                .weight(excel.getCellValue(Constants.SIZING_TAB, 3, 10).toString())
                 .decimals(Integer.parseInt(
-                        excel.getCellValue(Constants.SIZING_TAB, 4, 8).toString()))
+                        excel.getCellValue(Constants.SIZING_TAB, 4, 10).toString()))
                 .build());
-        restriction.setUnitMeasurementOutput(UnitMeasurement.builder()
+        /*restriction.setUnitMeasurementOutput(UnitMeasurement.builder()
                 .dimension(excel.getCellValue(Constants.SIZING_TAB, 6, 8).toString())
                 .weight(excel.getCellValue(Constants.SIZING_TAB, 7, 8).toString())
                 .decimals(Integer.parseInt(
                         excel.getCellValue(Constants.SIZING_TAB, 8, 8).toString()))
-                .build());
+                .build());*/
     }
 
     private void setInformationVehicles(Excel excel, Restriction restriction) {
@@ -305,7 +304,6 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             }
         }
         resume.setAssignations(assignationList);
-        System.out.println(new Gson().toJson(resume));
     }
 
     private void countVehiclesOptimized(List<Item> items, Resume resume) {
@@ -368,7 +366,6 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
             }
         }
         resume.setAssignations(assignationList);
-        System.out.println(new Gson().toJson(resume));
     }
 
     private void addResume(List<Assignation> assignationList, List<Item> items, Vehicle vehicle) {
