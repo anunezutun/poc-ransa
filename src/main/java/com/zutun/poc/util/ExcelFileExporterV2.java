@@ -1,7 +1,10 @@
 package com.zutun.poc.util;
 
 import com.zutun.poc.model.v2.Item;
+import com.zutun.poc.model.v2.RequestDto;
+import com.zutun.poc.model.v2.ResponseDto;
 import com.zutun.poc.model.v2.Resume;
+import com.zutun.poc.model.v2.Vehicle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -23,10 +26,15 @@ public class ExcelFileExporterV2 {
 
   public static final String REPORT_LOAD_SHEET_NAME = "DIMENSIONAMIENTO";
   public static final String SIZING_SHEET_OPTIMIZED_NAME = "DIMENSIONAMIENTO_OPTIMIZADO";
-  public static final List<String> REPORT_HEADERS = getReportHeaders();
+  public static final String RESTRICTIONS_SHEET_NAME = "RESTRICCIONES";
+  public static final List<String> SIZING_HEADERS = getSizingHeaders();
+  public static final List<String> RESTRICTION_HEADERS = getRestrictionHeaders();
 
-  public static ByteArrayInputStream loadFile(List<Item> items, Resume resume,
-      List<Item> itemsOptimized, Resume resumeOptimized) {
+  public static ByteArrayInputStream loadFile(ResponseDto responseDto, ResponseDto responseDtoOptimized) {
+    var items = responseDto.getFixingItem().getItems();
+    var resume = responseDto.getResume();
+    var itemsOptimized = responseDtoOptimized.getFixingItem().getItems();
+    var resumeOptimized = responseDtoOptimized.getResume();
     try (Workbook workbook = new XSSFWorkbook();
         ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
@@ -35,6 +43,7 @@ public class ExcelFileExporterV2 {
 
       writeSheet(workbook, sheet, items, resume);
       writeSheet(workbook, sheetOptimized, itemsOptimized, resumeOptimized);
+      writeRestrictionSheet(workbook, responseDto.getRequestDto());
 
       workbook.write(out);
       return new ByteArrayInputStream(out.toByteArray());
@@ -43,18 +52,71 @@ public class ExcelFileExporterV2 {
     }
   }
 
-  private static List<String> getReportHeaders() {
-    List<String> reportHeaders = new ArrayList<>();
-    reportHeaders.add("Orden");
-    reportHeaders.add("Descripcion");
-    reportHeaders.add("Longitud (m)");
-    reportHeaders.add("Ancho (m)");
-    reportHeaders.add("Alto (m)");
-    reportHeaders.add("Peso (Tn)");
-    reportHeaders.add("Tipo de Vehiculo");
-    reportHeaders.add("Dimensiones Vehiculo");
-    reportHeaders.add("Observaciones");
-    return reportHeaders;
+  private static List<String> getSizingHeaders() {
+    List<String> sizingHeaders = new ArrayList<>();
+    sizingHeaders.add("Orden");
+    sizingHeaders.add("Descripcion");
+    sizingHeaders.add("Longitud (m)");
+    sizingHeaders.add("Ancho (m)");
+    sizingHeaders.add("Alto (m)");
+    sizingHeaders.add("Peso (Tn)");
+    sizingHeaders.add("Tipo de Vehiculo");
+    sizingHeaders.add("Dimensiones Vehiculo");
+    sizingHeaders.add("Observaciones");
+    return sizingHeaders;
+  }
+
+  private static List<String> getRestrictionHeaders() {
+    List<String> restrictionHeaders = new ArrayList<>();
+    restrictionHeaders.add("Tipo de Unidad");
+    restrictionHeaders.add("Configuracion");
+    restrictionHeaders.add("Longitud (m)");
+    restrictionHeaders.add("Ancho (m)");
+    restrictionHeaders.add("Alto (m)");
+    restrictionHeaders.add("Peso (Tn)");
+    restrictionHeaders.add("Maximo de items");
+    restrictionHeaders.add("Prioridad");
+    restrictionHeaders.add("N° de vehiculos disponibles");
+    return restrictionHeaders;
+  }
+
+  private static void writeRestrictionSheet(Workbook workbook, RequestDto requestDto) {
+    Font headerFont = workbook.createFont();
+    headerFont.setBold(true);
+    headerFont.setColor(IndexedColors.BLACK.getIndex());
+
+    CellStyle headerCellStyle = workbook.createCellStyle();
+    headerCellStyle.setFont(headerFont);
+
+    Sheet sheet = workbook.createSheet(RESTRICTIONS_SHEET_NAME);
+    Row headerRow = sheet.createRow(0);
+
+    Cell cell;
+    int indexHeader = 0;
+    for (String header : RESTRICTION_HEADERS) {
+      cell = headerRow.createCell(indexHeader);
+      cell.setCellValue(header);
+      cell.setCellStyle(headerCellStyle);
+      indexHeader++;
+    }
+
+    int indexRow = 0;
+    for (Vehicle vehicle : requestDto.getRestriction().getVehicles()) {
+      int indexColumn = 0;
+
+      Row dataRow = sheet.createRow(indexRow + 1);
+      dataRow.createCell(indexColumn).setCellValue(vehicle.getName());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getConfiguration());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxDepth().doubleValue());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxWidth().doubleValue());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxHeight().doubleValue());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxWeight().doubleValue());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxItems());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getPriority());
+      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxUnitsAvailable());
+
+      indexRow++;
+    }
   }
 
   private static void writeSheet(Workbook workbook, Sheet sheet, List<Item> items, Resume resume){
@@ -76,7 +138,7 @@ public class ExcelFileExporterV2 {
 
     Cell cell;
     int indexHeader = 0;
-    for (String header : REPORT_HEADERS) {
+    for (String header : SIZING_HEADERS) {
       cell = headerRow.createCell(indexHeader);
       cell.setCellValue(header);
       cell.setCellStyle(headerCellStyle);

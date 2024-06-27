@@ -52,7 +52,7 @@ public class QuotationController {
             .body(new InputStreamResource(ExcelFileExporter.loadFile(items, resume, itemsOptimized, resumeOptimized)));
   }
 
-  @PostMapping("v2/load")
+  @PostMapping("/v2/load")
   public ResponseEntity<InputStreamResource> loadDynamicXls(
           @RequestPart(value = "file") MultipartFile file) {
     ResponseDto responseDto = new ResponseDto();
@@ -68,8 +68,7 @@ public class QuotationController {
     return ResponseEntity
             .ok()
             .headers(headers)
-            .body(new InputStreamResource(ExcelFileExporterV2.loadFile(responseDto.getFixingItem().getItems(),
-                responseDto.getResume(), responseDtoOptimized.getFixingItem().getItems(), responseDtoOptimized.getResume())));
+            .body(new InputStreamResource(ExcelFileExporterV2.loadFile(responseDto, responseDtoOptimized)));
   }
 
 }
