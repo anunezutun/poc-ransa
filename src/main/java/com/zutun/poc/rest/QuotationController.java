@@ -60,6 +60,7 @@ public class QuotationController {
     if (file != null) {
       responseDto = quotationService.processDynamicXls(file, Boolean.FALSE);
       responseDtoOptimized = quotationService.processDynamicXls(file, Boolean.TRUE);
+      responseDtoOptimized.setOptimized(Boolean.TRUE);
     }
     HttpHeaders headers = new HttpHeaders();
     var filename = "RESULTADO-" + file.getOriginalFilename();
