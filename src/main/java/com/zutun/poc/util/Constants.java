@@ -14,5 +14,6 @@ public class Constants {
     public static final BigDecimal YARD_FACTOR = new BigDecimal(1.094);
     public static final BigDecimal INCH_FACTOR = new BigDecimal(39.37);
     public static final BigDecimal TON_FACTOR = new BigDecimal(1000);
+    public static final BigDecimal POUND_FACTOR = new BigDecimal(2.205);
 
 }

@@ -1,8 +1,6 @@
 package com.zutun.poc.model.v2;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -29,5 +27,6 @@ public class Item {
     private Vehicle vehicle;
     private List<String> observations = new ArrayList<>();
     private Boolean isRotated;
+    private Integer group;
 
 }

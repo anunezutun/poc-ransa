@@ -17,6 +17,8 @@ public class WeightConverter {
                 return value;
             case "tonelada":
                 return value.divide(Constants.TON_FACTOR, decimals, RoundingMode.HALF_UP);
+            case "libra":
+                return value.divide(Constants.POUND_FACTOR, decimals, RoundingMode.HALF_UP);
             default:
                 throw new IllegalArgumentException("Unsupported unit: " + from);
         }
@@ -28,6 +30,9 @@ public class WeightConverter {
                 return value;
             case "tonelada":
                 return value.multiply(Constants.TON_FACTOR)
+                        .setScale(decimals, RoundingMode.HALF_UP);
+            case "libra":
+                return value.multiply(Constants.POUND_FACTOR)
                         .setScale(decimals, RoundingMode.HALF_UP);
             default:
                 throw new IllegalArgumentException("Unsupported unit: " + to);

@@ -106,6 +106,7 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
         resume.setTotalWeight(calculateTotalWeight(items));
         if (Boolean.FALSE.equals(optimized)) {
             countVehicles(items, resume);
+            System.out.println(new Gson().toJson(items));
         } else {
             countVehiclesOptimized(items, resume);
         }
@@ -303,6 +304,15 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                 addResume(assignationList, joinItems, vehicle);
             }
         }
+        Integer countGroup = 1;
+        for (Assignation assignation : assignationList) {
+            if (assignation.getItems().size() > 1) {
+                for (Item item : assignation.getItems()) {
+                    item.setGroup(countGroup);
+                }
+                countGroup++;
+            }
+        }
         resume.setAssignations(assignationList);
     }
 
@@ -363,6 +373,15 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                     }
                 }
                 addResume(assignationList, joinItems, vehicle);
+            }
+        }
+        Integer countGroup = 1;
+        for (Assignation assignation : assignationList) {
+            if (assignation.getItems().size() > 1) {
+                for (Item item : assignation.getItems()) {
+                    item.setGroup(countGroup);
+                }
+                countGroup++;
             }
         }
         resume.setAssignations(assignationList);

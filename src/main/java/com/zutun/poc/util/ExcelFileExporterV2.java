@@ -3,7 +3,6 @@ package com.zutun.poc.util;
 import com.zutun.poc.model.v2.Item;
 import com.zutun.poc.model.v2.RequestDto;
 import com.zutun.poc.model.v2.ResponseDto;
-import com.zutun.poc.model.v2.UnitMeasurement;
 import com.zutun.poc.model.v2.Vehicle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -132,6 +132,10 @@ public class ExcelFileExporterV2 {
     CellStyle observationCellStyle = workbook.createCellStyle();
     observationCellStyle.setFont(observationFont);
 
+    CellStyle newStyle = workbook.createCellStyle();
+    newStyle.setFillForegroundColor(IndexedColors.fromInt(15).getIndex());
+    newStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
     Cell cell;
     int indexHeader = 0;
     for (String header : SIZING_HEADERS) {
@@ -171,11 +175,12 @@ public class ExcelFileExporterV2 {
       heigth.setCellValue(item.getHeight().doubleValue());
       Cell weight = dataRow.createCell(++indexColumn);
       weight.setCellValue(item.getWeight().doubleValue());
-      dataRow
-          .createCell(++indexColumn)
-          .setCellValue(
+      Cell vehicleInfo = dataRow.createCell(++indexColumn);
+      vehicleInfo.setCellValue(
               Objects.isNull(item.getVehicle()) ? "" : "#" + item.getVehicle().getVehicleInfo());
-
+      if (Objects.nonNull(item.getGroup())) {
+        vehicleInfo.setCellStyle(newStyle);
+      }
       if (indexRow + 1 == 1) {
         cell = dataRow.createCell(9);
         cell.setCellValue("ENTRADA");
@@ -245,5 +250,14 @@ public class ExcelFileExporterV2 {
       dataRow.createCell(0).setCellValue("  " + entry.getKey());
       dataRow.createCell(1).setCellValue(entry.getValue());
     }
+
+
+  }
+
+  private static CellStyle getGroupStyle(Workbook workbook, Integer index) {
+    CellStyle newStyle = workbook.createCellStyle();
+    newStyle.setFillForegroundColor(IndexedColors.fromInt(index).getIndex());
+    newStyle.setFillPattern(FillPatternType.FINE_DOTS);
+    return newStyle;
   }
 }
