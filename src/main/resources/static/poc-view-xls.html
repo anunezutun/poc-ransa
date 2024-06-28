@@ -22,7 +22,7 @@
     <script>
       const uploadButton = document.getElementById('uploadButton');
       const fileInput = document.getElementById('fileInput');
-      const endpoint = 'http://localhost:8080/quotation/load';
+      const endpoint = 'http://localhost:8080/quotation/v2/load';
       let filename = '';
       uploadButton.addEventListener('click', () => {
         const file = fileInput.files[0];

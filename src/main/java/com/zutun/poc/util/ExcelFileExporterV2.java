@@ -3,7 +3,6 @@ package com.zutun.poc.util;
 import com.zutun.poc.model.v2.Item;
 import com.zutun.poc.model.v2.RequestDto;
 import com.zutun.poc.model.v2.ResponseDto;
-import com.zutun.poc.model.v2.UnitMeasurement;
 import com.zutun.poc.model.v2.Vehicle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,7 +25,6 @@ public class ExcelFileExporterV2 {
   public static final String REPORT_LOAD_SHEET_NAME = "DIMENSIONAMIENTO";
   public static final String SIZING_SHEET_OPTIMIZED_NAME = "DIMENSIONAMIENTO_OPTIMIZADO";
   public static final String RESTRICTIONS_SHEET_NAME = "RESTRICCIONES";
-  public static final List<String> SIZING_HEADERS = getSizingHeaders();
   public static final List<String> RESTRICTION_HEADERS = getRestrictionHeaders();
 
   public static ByteArrayInputStream loadFile(ResponseDto responseDto, ResponseDto responseDtoOptimized) {
@@ -57,6 +55,20 @@ public class ExcelFileExporterV2 {
     sizingHeaders.add("Alto (m)");
     sizingHeaders.add("Peso (Tn)");
     sizingHeaders.add("Tipo de Vehiculo");
+    sizingHeaders.add("Observaciones");
+    return sizingHeaders;
+  }
+
+  private static List<String> getSizingHeadersOptimized() {
+    List<String> sizingHeaders = new ArrayList<>();
+    sizingHeaders.add("Orden");
+    sizingHeaders.add("Descripcion");
+    sizingHeaders.add("Longitud (m)");
+    sizingHeaders.add("Ancho (m)");
+    sizingHeaders.add("Alto (m)");
+    sizingHeaders.add("Peso (Tn)");
+    sizingHeaders.add("Tipo de Vehiculo");
+    sizingHeaders.add("Rotacion");
     sizingHeaders.add("Observaciones");
     return sizingHeaders;
   }
@@ -132,16 +144,30 @@ public class ExcelFileExporterV2 {
     CellStyle observationCellStyle = workbook.createCellStyle();
     observationCellStyle.setFont(observationFont);
 
+    Font rotateItemFont = workbook.createFont();
+    rotateItemFont.setColor(IndexedColors.GREEN.getIndex());
+
+    CellStyle rotateCellStyle = workbook.createCellStyle();
+    rotateCellStyle.setFont(rotateItemFont);
+
+    List<String> headers;
+
+    if (Boolean.TRUE.equals(response.getOptimized())){
+      headers = getSizingHeadersOptimized();
+    }else {
+      headers = getSizingHeaders();
+    }
+
     Cell cell;
     int indexHeader = 0;
-    for (String header : SIZING_HEADERS) {
+    for (String header : headers) {
       cell = headerRow.createCell(indexHeader);
       cell.setCellValue(header);
       cell.setCellStyle(cellStyleBlackAndBold);
       indexHeader++;
     }
 
-    cell = headerRow.createCell(9);
+    cell = headerRow.createCell(10);
     cell.setCellValue("UNIDAD DE MEDIDA");
     cell.setCellStyle(cellStyleBlackAndBold);
 
@@ -162,11 +188,6 @@ public class ExcelFileExporterV2 {
       Cell width = dataRow.createCell(++indexColumn);
       width.setCellValue(item.getWidth().doubleValue());
 
-      if (Boolean.TRUE.equals(item.getIsRotated())){
-        depth.setCellValue(item.getWidth().doubleValue());
-        width.setCellValue(item.getDepth().doubleValue());
-      }
-
       Cell heigth = dataRow.createCell(++indexColumn);
       heigth.setCellValue(item.getHeight().doubleValue());
       Cell weight = dataRow.createCell(++indexColumn);
@@ -177,22 +198,42 @@ public class ExcelFileExporterV2 {
               Objects.isNull(item.getVehicle()) ? "" : "#" + item.getVehicle().getVehicleInfo());
 
       if (indexRow + 1 == 1) {
-        cell = dataRow.createCell(9);
+        cell = dataRow.createCell(10);
         cell.setCellValue("ENTRADA");
         cell.setCellStyle(cellStyleBlackAndBold);
       } else if (indexRow + 1 == 2) {
-        dataRow.createCell(9).setCellValue("Dimensiones");
-        dataRow.createCell(10).setCellValue(unitMeasurementInput.getDimension());
+        dataRow.createCell(10).setCellValue("Dimensiones");
+        dataRow.createCell(11).setCellValue(unitMeasurementInput.getDimension());
       } else if (indexRow + 1 == 3) {
-        dataRow.createCell(9).setCellValue("Peso");
-        dataRow.createCell(10).setCellValue(unitMeasurementInput.getWeight());
+        dataRow.createCell(10).setCellValue("Peso");
+        dataRow.createCell(11).setCellValue(unitMeasurementInput.getWeight());
       } else if (indexRow + 1 == 4) {
-        dataRow.createCell(9).setCellValue("Decimales");
-        dataRow.createCell(10).setCellValue(unitMeasurementInput.getDecimals());
+        dataRow.createCell(10).setCellValue("Decimales");
+        dataRow.createCell(11).setCellValue(unitMeasurementInput.getDecimals());
+      }
+
+      if (Boolean.TRUE.equals(response.getOptimized())){
+        Cell rotation = dataRow.createCell(++indexColumn);
+
+        if (Boolean.TRUE.equals(item.getIsRotated())){
+          depth.setCellValue(item.getWidth().doubleValue());
+          width.setCellValue(item.getDepth().doubleValue());
+          rotation.setCellValue("Si");
+
+          order.setCellStyle(rotateCellStyle);
+          description.setCellStyle(rotateCellStyle);
+          depth.setCellStyle(rotateCellStyle);
+          width.setCellStyle(rotateCellStyle);
+          heigth.setCellStyle(rotateCellStyle);
+          weight.setCellStyle(rotateCellStyle);
+
+        }else{
+          rotation.setCellValue("No");
+        }
       }
 
 
-      if (!Objects.isNull(item.getObservations()) || Boolean.TRUE.equals(item.getIsRotated())) {
+      if (!Objects.isNull(item.getObservations())) {
         Cell observations = dataRow.createCell(++indexColumn);
         observations.setCellValue(
             Objects.isNull(item.getObservations()) ? "" : item.getObservations().get(0));

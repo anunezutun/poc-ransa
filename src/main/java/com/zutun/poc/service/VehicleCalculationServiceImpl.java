@@ -334,11 +334,12 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                     var currentItem = groupItems.get(i);
                     var nextDepth = currentItem.getDepth();
 
-                    if (currentItem.getDepth().compareTo(vehicleWidth) <= 0){
+                    if (currentItem.getDepth().compareTo(vehicleWidth) <= 0
+                    && firstItem.getDepth().compareTo(vehicleWidth) <= 0){
                         initialDepth = initialWidth;
                         nextDepth = currentItem.getWidth();
-                        firstItem.setIsRotated(Boolean.TRUE);
                         currentItem.setIsRotated(Boolean.TRUE);
+                        firstItem.setIsRotated(Boolean.TRUE);
                     }
 
                     var totalDepth = initialDepth.add(nextDepth);

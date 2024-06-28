@@ -9,4 +9,5 @@ public class ResponseDto {
     private RequestDto requestDto;
     private FixingItem fixingItem;
     private Resume resume;
+    private Boolean optimized;
 }
