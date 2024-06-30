@@ -111,7 +111,6 @@ public class ExcelFileExporterV2 {
     int indexRow = 0;
     for (Vehicle vehicle : requestDto.getRestriction().getVehicles()) {
       int indexColumn = 0;
-
       Row dataRow = sheet.createRow(indexRow + 1);
       dataRow.createCell(indexColumn).setCellValue(vehicle.getName());
       dataRow.createCell(++indexColumn).setCellValue(vehicle.getConfiguration());
@@ -119,9 +118,13 @@ public class ExcelFileExporterV2 {
       dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxWidth().doubleValue());
       dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxHeight().doubleValue());
       dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxWeight().doubleValue());
-      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxItems());
+      dataRow.createCell(++indexColumn).setCellValue(
+              vehicle.getMaxItems() > 50 ? "n" : vehicle.getMaxItems().toString()
+      );
       dataRow.createCell(++indexColumn).setCellValue(vehicle.getPriority());
-      dataRow.createCell(++indexColumn).setCellValue(vehicle.getMaxUnitsAvailable());
+      dataRow.createCell(++indexColumn).setCellValue(
+              vehicle.getMaxUnitsAvailable() > 10000
+                      ? "n" : vehicle.getMaxUnitsAvailable().toString());
 
       indexRow++;
     }

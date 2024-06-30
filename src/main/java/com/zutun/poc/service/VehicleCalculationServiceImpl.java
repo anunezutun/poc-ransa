@@ -212,7 +212,11 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                 Constants.FIRST_ROW_INDEX,
                 Constants.LAST_COLUMN_VEHICLE_RESTRICTION);
         List<Vehicle> vehicles = new ArrayList<>();
+
         for (Map<Integer, String> row : rows) {
+
+            String maxItems = row.get(6);
+            String maxUnits = row.get(8);
             vehicles.add(Vehicle.builder()
                     .name(row.get(0))
                     .configuration(row.get(1))
@@ -220,9 +224,11 @@ public class VehicleCalculationServiceImpl implements VehicleCalculationService 
                     .maxWidth(new BigDecimal(row.get(3)))
                     .maxHeight(new BigDecimal(row.get(4)))
                     .maxWeight(new BigDecimal(row.get(5)))
-                    .maxItems(Integer.parseInt(row.get(6)))
+                    .maxItems(maxItems.equalsIgnoreCase("n")
+                            ? 1000 : Integer.parseInt(row.get(6)))
                     .priority(Integer.parseInt(row.get(7)))
-                    .maxUnitsAvailable(Integer.parseInt(row.get(8)))
+                    .maxUnitsAvailable(maxUnits.equalsIgnoreCase("n")
+                            ? 100000 : Integer.parseInt(row.get(8)))
                     .build());
         }
         restriction.setVehicles(vehicles);
